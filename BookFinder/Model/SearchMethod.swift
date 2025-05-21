@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+enum SearchMethod{
+    case ByName
+    case ByCategory
+}

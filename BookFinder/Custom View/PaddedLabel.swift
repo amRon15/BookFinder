@@ -8,13 +8,17 @@
 import UIKit
 
 class PaddedLabel: UILabel {
-
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
+    
+    var contentInset = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+    
+    override func drawText(in rect: CGRect) {
+        let insetRect = rect.inset(by: contentInset)
+        super.drawText(in: insetRect)
     }
-    */
-
+    
+    override var intrinsicContentSize: CGSize {
+        let size = super.intrinsicContentSize
+        return CGSize(width: size.width + contentInset.left + contentInset.right,
+                      height: size.height + contentInset.top + contentInset.bottom)
+    }
 }

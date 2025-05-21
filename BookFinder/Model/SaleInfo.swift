@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+struct SaleInfo: Codable{
+    let country: String
+    let saleability: String
+    let listPrice: Price?
+    let retailPrice: Price?
+}

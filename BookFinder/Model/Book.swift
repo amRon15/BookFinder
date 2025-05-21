@@ -8,5 +8,9 @@
 import Foundation
 
 struct Book: Codable{
-    
+    let id: String
+    let selfLink: String
+    let volumeInfo: VolumeInfo
+    let saleInfo: SaleInfo
+    let accessInfo: AccessInfo
 }

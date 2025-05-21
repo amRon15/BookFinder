@@ -34,8 +34,9 @@ class SearchViewController: UIViewController {
         view.addGestureRecognizer(tap)
     }
     
-    @objc func pushBookListViewController(){
+    @objc func searchFieldPushBookListViewController(){
         let bookListViewController = BookListViewController()
+        bookListViewController.searchMethod = .ByName
         
         guard isBookNameEmpty else {
             presentErrorAlertOnMainThread(title: "Empty book name", message: "Please enter a book name. Empty book name is invalid.", buttonTitle: "OK")
@@ -45,8 +46,6 @@ class SearchViewController: UIViewController {
         bookListViewController.title = searchBookField.text
         navigationController?.pushViewController(bookListViewController, animated: true)
     }
-    
-    
     
     func configureViewController(){
         view.backgroundColor = .systemBackground
@@ -68,6 +67,7 @@ class SearchViewController: UIViewController {
     func configureCollectionView(){
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: twoColumnLayout())
         collectionView.dataSource = self
+        collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
         collectionView.register(CategoryCollectionViewCell.self, forCellWithReuseIdentifier: CategoryCollectionViewCell.reuseID)
@@ -90,7 +90,7 @@ class SearchViewController: UIViewController {
         
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.sectionInset = UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding)
-        flowLayout.itemSize = CGSize(width: itemWidth, height: 52)        
+        flowLayout.itemSize = CGSize(width: itemWidth, height: 80)        
         
         return flowLayout
     }
@@ -98,12 +98,12 @@ class SearchViewController: UIViewController {
 
 extension SearchViewController: UITextFieldDelegate{
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        pushBookListViewController()
+        searchFieldPushBookListViewController()
         return true
     }
 }
 
-extension SearchViewController: UICollectionViewDataSource{
+extension SearchViewController: UICollectionViewDataSource, UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return categories.count
     }
@@ -112,8 +112,28 @@ extension SearchViewController: UICollectionViewDataSource{
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCollectionViewCell.reuseID, for: indexPath) as! CategoryCollectionViewCell
         
         let category = categories[indexPath.item]
-        cell.set(category: category)                
+        cell.set(category: category)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleCellTap(_:)))
+        cell.addGestureRecognizer(tap)
+        cell.tag = indexPath.item
         
         return cell
     }
+    
+    @objc func handleCellTap(_ sender: UITapGestureRecognizer) {
+        guard let cell = sender.view as? CategoryCollectionViewCell else { return }
+        let category = categories[cell.tag]
+        cellPushBookListViewController(category: category)
+    }
+    
+    func cellPushBookListViewController(category: String){
+        let bookListViewController = BookListViewController()
+        
+        bookListViewController.bookName = category
+        bookListViewController.title = category
+        bookListViewController.searchMethod = .ByCategory
+        navigationController?.pushViewController(bookListViewController, animated: true)
+    }
 }
+

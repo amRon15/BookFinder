@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct ResultItem: Codable{
+    let totalItems: Int
+    let items: [Book]
+}

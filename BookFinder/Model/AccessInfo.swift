@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct AccessInfo: Codable{
+    let country: String
+    let webReaderLink: String?
+}

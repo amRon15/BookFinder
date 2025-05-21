@@ -9,7 +9,7 @@ import UIKit
 
 class CategoryCollectionViewCell: UICollectionViewCell {
     static let reuseID = "CategoryCollectionViewCell"
-    let categoryButton = CustomButton()
+    let categoryLabel = PaddedLabel()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -21,23 +21,31 @@ class CategoryCollectionViewCell: UICollectionViewCell {
     }
     
     func set(category: String){
-        categoryButton.setTitle(category, for: .normal)
-        categoryButton.backgroundColor = .systemGreen
+        categoryLabel.text = category
+        categoryLabel.backgroundColor = .systemGreen
+        categoryLabel.textColor = .white
+        categoryLabel.layer.cornerRadius = 10
+        categoryLabel.layer.masksToBounds = true
+        
     }
         
     
     private func configure(){
-        addSubview(categoryButton)
+        addSubview(categoryLabel)
         
-        categoryButton.titleLabel?.numberOfLines = 0
+        categoryLabel.numberOfLines = 0
+        categoryLabel.translatesAutoresizingMaskIntoConstraints = false
+        categoryLabel.textAlignment = .center
+        categoryLabel.isUserInteractionEnabled = true
         
         let padding: CGFloat = 4
-                
+        isUserInteractionEnabled = true
+        
         NSLayoutConstraint.activate([
-            categoryButton.topAnchor.constraint(equalTo: topAnchor, constant: padding),
-            categoryButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            categoryButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
-            categoryButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding)
+            categoryLabel.topAnchor.constraint(equalTo: topAnchor, constant: padding),
+            categoryLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+            categoryLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
+            categoryLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding)
         ])
     }
 }
