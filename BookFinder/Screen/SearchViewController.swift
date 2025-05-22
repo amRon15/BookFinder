@@ -11,6 +11,9 @@ class SearchViewController: UIViewController {
     let searchBookField = SearchBookField()
     var collectionView: UICollectionView!
     let categories = Category.categories
+    var books: [Book] = []
+    
+    var bookViewController: BookViewController!
     
     var isBookNameEmpty: Bool{
         return !searchBookField.text!.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -18,17 +21,21 @@ class SearchViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshBooks))
+        navigationItem.rightBarButtonItem?.tintColor = .systemGreen
+        navigationController?.navigationBar.tintColor = .systemGreen
+        
         configureViewController()
         configureSearchBookField()
+        configureBookViewController()
         configureCollectionView()
-        createDismissKeyboardTapGesture()
+        createDismissKeyboardTapGesture()        
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.isNavigationBarHidden = true
+    @objc func refreshBooks(){
+        bookViewController.getBooks()
     }
-    
+
     func createDismissKeyboardTapGesture(){
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing))
         view.addGestureRecognizer(tap)
@@ -49,6 +56,22 @@ class SearchViewController: UIViewController {
     
     func configureViewController(){
         view.backgroundColor = .systemBackground
+    }
+    
+    func configureBookViewController(){
+        bookViewController = BookViewController()
+        addChild(bookViewController)
+        view.addSubview(bookViewController.view)
+        bookViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            bookViewController.view.topAnchor.constraint(equalTo: searchBookField.bottomAnchor, constant: 12),
+            bookViewController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 12),
+            bookViewController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -12),
+            bookViewController.view.heightAnchor.constraint(equalToConstant: 300)
+        ])
+        
+        bookViewController.didMove(toParent: self)
     }
     
     private func configureSearchBookField(){
@@ -74,12 +97,14 @@ class SearchViewController: UIViewController {
         
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: searchBookField.bottomAnchor, constant: 8),
+            collectionView.topAnchor.constraint(equalTo: bookViewController.view.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
         ])
     }
+    
+    
     
     func twoColumnLayout() -> UICollectionViewFlowLayout{
         let width = view.bounds.width

@@ -6,3 +6,16 @@
 //
 
 import Foundation
+import UIKit
+
+extension NSAttributedString{
+    
+    func detailAttributedText(_ text: String, _ main: String) -> NSAttributedString{
+        var frontText = AttributedString("\(text): ")
+        frontText.foregroundColor = .systemGray
+        
+        let mainText = AttributedString(main)
+        
+        return NSAttributedString(frontText + mainText)
+    }
+}

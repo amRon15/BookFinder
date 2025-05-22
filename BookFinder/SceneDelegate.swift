@@ -27,22 +27,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func tabbar() -> UITabBarController{
         let tabbar = UITabBarController()
         UITabBar.appearance().tintColor = .systemGreen
-        tabbar.viewControllers = [homeNavigationController(), searchNavigationController(), bookmarkNavigationController()]
+        tabbar.viewControllers = [searchNavigationController(), bookmarkNavigationController()]
         
         return tabbar
     }
     
-    func homeNavigationController() -> UINavigationController{
-        let homeNavigationController = HomeViewController()
-        homeNavigationController.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house.fill"), tag: 0)
-        
-        return UINavigationController(rootViewController: homeNavigationController)
-    }
-    
     func searchNavigationController() -> UINavigationController{
         let searchNavigationController = SearchViewController()
-        searchNavigationController.title = "Search"
-        searchNavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 1)
+        searchNavigationController.title = "Home"
+        searchNavigationController.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house.fill"), tag: 0)
         
         return UINavigationController(rootViewController: searchNavigationController)
     }
@@ -50,7 +43,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func bookmarkNavigationController() -> UINavigationController{
         let bookmarkNavigationController = BookmarkViewController()
         bookmarkNavigationController.title = "Bookmark"
-        bookmarkNavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 2)
+        bookmarkNavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 1)
         
         return UINavigationController(rootViewController: bookmarkNavigationController)
     }

@@ -11,7 +11,7 @@ class BookListViewController: UIViewController {
     var bookName: String!
     var resultItem: ResultItem?
     var books: [Book]?
-    var searchMethod: SearchMethod!
+    var searchMethod: SearchMethod!        
     
     var tableView = UITableView()
     var spinner = UIActivityIndicatorView()
@@ -20,6 +20,7 @@ class BookListViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         navigationController?.isNavigationBarHidden = false
+        navigationController?.navigationBar.tintColor = .systemGreen
         navigationItem.backButtonTitle = "Back"
         configureTableView()
         configureProgressView()

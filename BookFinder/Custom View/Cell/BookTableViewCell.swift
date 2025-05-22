@@ -15,7 +15,6 @@ class BookTableViewCell: UITableViewCell {
     var bookAuthorsLabel = UILabel()
     var bookLanguageLabel = UILabel()
     var bookCategoryLabel = UILabel()
-    var bookDateLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -25,8 +24,6 @@ class BookTableViewCell: UITableViewCell {
         configureAuthorsLabel()
         configureLanguageLabel()
         configureCategoryLabel()
-        configureDateLabel()
-        
     }
     
     required init?(coder: NSCoder) {
@@ -38,8 +35,9 @@ class BookTableViewCell: UITableViewCell {
         self.bookTitleLabel.text = book.volumeInfo.title
         self.bookAuthorsLabel.text = book.volumeInfo.authors?.joined(separator: ", ")
         self.bookLanguageLabel.text = "Language: \(book.volumeInfo.language)"
-        self.bookCategoryLabel.text = "Category: \(String(describing: book.volumeInfo.categories?.joined(separator: ", ")))"
-        self.bookDateLabel.text = "Published Date: \(String(describing: book.volumeInfo.publishedDate))"
+        if let categories = book.volumeInfo.categories{
+            self.bookCategoryLabel.text = "Category: \(categories.joined(separator: ", "))"
+        }
     }
     
     func configureImageView(){
@@ -51,7 +49,9 @@ class BookTableViewCell: UITableViewCell {
         bookImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             bookImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            bookImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            bookImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 12),
+            bookImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            bookImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
             bookImageView.heightAnchor.constraint(equalToConstant: 120),
             bookImageView.widthAnchor.constraint(equalToConstant: 90)
         ])
@@ -107,22 +107,8 @@ class BookTableViewCell: UITableViewCell {
         NSLayoutConstraint.activate([
             bookCategoryLabel.topAnchor.constraint(equalTo: bookLanguageLabel.bottomAnchor, constant: 4),
             bookCategoryLabel.leadingAnchor.constraint(equalTo: bookImageView.trailingAnchor, constant: 12),
-            bookCategoryLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12)
+            bookCategoryLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            
         ])
     }
-    
-    func configureDateLabel(){
-        contentView.addSubview(bookDateLabel)
-        
-        bookDateLabel.numberOfLines = 0
-        bookDateLabel.font = .preferredFont(forTextStyle: .subheadline)
-        bookDateLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            bookDateLabel.topAnchor.constraint(equalTo: bookCategoryLabel.bottomAnchor, constant: 4),
-            bookDateLabel.leadingAnchor.constraint(equalTo: bookImageView.trailingAnchor, constant: 12),
-            bookDateLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            bookDateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
-        ])
-    }
-
 }
