@@ -1,17 +1,17 @@
 //
-//  HomeViewController.swift
+//  BookViewController.swift
 //  BookFinder
 //
-//  Created by 邱允聰 on 19/5/2025.
+//  Created by 邱允聰 on 23/5/2025.
 //
 
 import UIKit
 
-class HomeViewController: UIViewController {
+class BookViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // Do any additional setup after loading the view.
     }
     
@@ -25,7 +25,5 @@ class HomeViewController: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
-    
-    
 
 }
