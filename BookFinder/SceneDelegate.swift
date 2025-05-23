@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GoogleSignIn
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -21,7 +22,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = tabbar()
         window?.makeKeyAndVisible()
         
-        configureNavBar()
+        if GIDSignIn.sharedInstance.hasPreviousSignIn() {
+            // 嘗試恢復之前的登錄狀態
+            GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] user, error in
+                if let user = user {
+                    let authToken = user.accessToken.tokenString
+                    // 儲存權杖到 GoogleSignInManager
+                    NetworkManager.shared.userAuthToken = authToken
+                    NetworkManager.shared.currentUser = user
+                    // 設置主畫面（UITabBarController）
+                    self?.window?.rootViewController = self?.tabbar()
+                } else {
+                    // 登錄失敗或無之前的登錄，顯示 LoginViewController
+                    self?.window?.rootViewController = LoginViewController()
+                }
+                self?.window?.makeKeyAndVisible()
+                self?.configureNavBar()
+            }
+        } else {
+            // 無登錄記錄，顯示 LoginViewController
+            window?.rootViewController = LoginViewController()
+            window?.makeKeyAndVisible()
+            configureNavBar()
+        }                
     }
     
     func tabbar() -> UITabBarController{
