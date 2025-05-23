@@ -31,11 +31,11 @@ class BookTableViewCell: UITableViewCell {
     }
     
     func set(_ book: Book){
-        self.bookImageView.load(book.volumeInfo.imageLinks?.thumbnail)
-        self.bookTitleLabel.text = book.volumeInfo.title
-        self.bookAuthorsLabel.text = book.volumeInfo.authors?.joined(separator: ", ")
-        self.bookLanguageLabel.text = "Language: \(book.volumeInfo.language)"
-        if let categories = book.volumeInfo.categories{
+        self.bookImageView.load(book.volumeInfo?.imageLinks?.thumbnail)
+        self.bookTitleLabel.text = book.volumeInfo?.title
+        self.bookAuthorsLabel.text = book.volumeInfo?.authors?.joined(separator: ", ")
+        self.bookLanguageLabel.text = "Language: \(book.volumeInfo?.language)"
+        if let categories = book.volumeInfo?.categories{
             self.bookCategoryLabel.text = "Category: \(categories.joined(separator: ", "))"
         }
     }

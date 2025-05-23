@@ -11,19 +11,84 @@ class BookmarkViewController: UIViewController {
     var collectionView: UICollectionView!
     var books: [Book] = []
     let spinner = UIActivityIndicatorView()
+    let messageLabelView = UILabel()
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshBookShelf))
+        navigationController?.navigationBar.tintColor = .systemGreen
+        
         configureCollectionView()
+        configureSpinner()
+        configureMessageLabelView()
+        getBooks()
+    }
+    
+    @objc func refreshBookShelf(){
+        getBooks()
     }
     
     func getBooks(){
+        books = []
+        self.collectionView.reloadData()
+        spinner.startAnimating()
         
+        NetworkManager.shared.getBookshelf { resultItem, error in
+            if let error = error{
+                DispatchQueue.main.async {
+                    self.presentErrorAlertOnMainThread(title: "Load failed", message: error.localizedDescription, buttonTitle: "OK")
+                    self.messageLabelView.isHidden = false
+                    self.messageLabelView.text = "No book shelf or book have been saved"
+                }
+            }
+            
+            if let resultItem = resultItem{
+                DispatchQueue.main.async {
+                    guard let books = resultItem.items else { return }
+                    self.updateBooks(books)
+                    self.messageLabelView.isHidden = true
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.spinner.stopAnimating()
+            }
+        }
+    }
+    
+    func updateBooks(_ books: [Book]){
+        self.books = books
+        self.collectionView.reloadData()
+    }
+    
+    func configureMessageLabelView(){
+        messageLabelView.textColor = .systemGreen
+        messageLabelView.font = .preferredFont(forTextStyle: .title3)
+        messageLabelView.numberOfLines = 0
+        messageLabelView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(messageLabelView)
+        
+        NSLayoutConstraint.activate([
+            messageLabelView.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            messageLabelView.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+        ])
+    }
+    
+    func configureSpinner(){
+        spinner.color = .systemGreen
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(spinner)
+        
+        NSLayoutConstraint.activate([
+            spinner.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
+            spinner.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
+        ])
     }
     
     func configureCollectionView(){
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createThreeColLayout())
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createTwoColLayout())
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -31,6 +96,7 @@ class BookmarkViewController: UIViewController {
         collectionView.backgroundColor = .systemBackground
         let verticalAnchor: CGFloat = 12
         let horizontalAnchor: CGFloat = 12
+        view.addSubview(collectionView)
         
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: verticalAnchor),
@@ -38,22 +104,22 @@ class BookmarkViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: horizontalAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12)
         ])
-        
-        
-        view.addSubview(collectionView)
     }
     
-    func createThreeColLayout() -> UICollectionViewFlowLayout{
+    func createTwoColLayout() -> UICollectionViewFlowLayout{
         let layout = UICollectionViewFlowLayout()
         let width = view.bounds.width
-        let minItemSpacing: CGFloat = 10
-        let padding: CGFloat = 8
-        let avaliableWidth = width - (padding * 3) - (minItemSpacing)
-        let itemWidth = avaliableWidth / 3
+        let minItemSpacing: CGFloat = 22
+        let horizontalPadding: CGFloat = 12
+        let verticalPadding: CGFloat = 22
+        let avaliableWidth = width - (horizontalPadding * 2) - (minItemSpacing * 2)
+        let itemWidth = avaliableWidth / 2 - horizontalPadding * 2
         
         layout.scrollDirection = .vertical
-        layout.sectionInset = UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding)
-        layout.itemSize = CGSize(width: itemWidth, height: 80)
+        layout.sectionInset = UIEdgeInsets(top: verticalPadding, left: horizontalPadding, bottom: verticalPadding, right: horizontalPadding)
+        layout.itemSize = CGSize(width: itemWidth, height: itemWidth * 1.5)
+        layout.minimumLineSpacing = minItemSpacing
+        layout.minimumInteritemSpacing = minItemSpacing
             
         return layout
     }

@@ -11,6 +11,7 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
     var book: Book!
     let collectionViewItems = ["Overview", "Detail", "Links"]
     var selectedIndex = 0
+    var isBookmark: Bool = false
     
     // Scroll view
     let scrollView = UIScrollView()
@@ -63,6 +64,8 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
         navigationController?.isNavigationBarHidden = false
         navigationController?.navigationBar.tintColor = .systemGreen
         
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "bookmark"), style: .plain, target: self, action: #selector(bookmark))
+        
         // Configure views in correct order
         configureScrollView()
         configureTopSection()
@@ -70,7 +73,7 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
         configureOverview()
         configureDetail()
         configureLink()
-        
+        isBookSaved()
         // Set initial view state
         updateContentView()
     }
@@ -78,6 +81,57 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateScrollViewContentSize()
+    }
+    
+    @objc func bookmark(){
+        if isBookmark{
+            NetworkManager.shared.deleteBookmark(book.id) { isDeleted, error in
+                if let error = error{
+                    DispatchQueue.main.async {
+                        self.presentErrorAlertOnMainThread(title: "Delete failed", message: error, buttonTitle: "OK")
+                        print(error)
+                    }
+                }
+                
+                if isDeleted{
+                    DispatchQueue.main.async {
+                        self.navigationItem.rightBarButtonItem?.image = UIImage(systemName: "bookmark")
+                        self.isBookmark = !isDeleted
+                    }
+                }
+            }
+        } else{
+            NetworkManager.shared.addBookToShelf(book.id) { isSuccess, error in
+                if let error = error{
+                    DispatchQueue.main.async {
+                        self.presentErrorAlertOnMainThread(title: "Saved failed", message: error, buttonTitle: "OK")
+                        print(error)
+                    }
+                }
+                
+                if isSuccess{
+                    DispatchQueue.main.async {
+                        self.navigationItem.rightBarButtonItem?.image = UIImage(systemName: "bookmark.fill")
+                        self.isBookmark = isSuccess
+                    }
+                }
+            }
+        }
+    }
+    
+    func isBookSaved(){
+        NetworkManager.shared.isBookSaved(book.id) { isSaved, error in
+            if let error = error{
+                print(error)
+            }
+            
+            if isSaved{
+                DispatchQueue.main.async {
+                    self.navigationItem.rightBarButtonItem?.image = UIImage(systemName: "bookmark.fill")
+                    self.isBookmark = isSaved
+                }
+            }
+        }
     }
     
     func updateScrollViewContentSize() {
@@ -213,34 +267,34 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
         
         // Configure subviews
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.load(book?.volumeInfo.imageLinks?.thumbnail)
+        imageView.load(book?.volumeInfo?.imageLinks?.thumbnail)
         imageView.contentMode = .scaleAspectFit
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = .preferredFont(forTextStyle: .title2)
-        titleLabel.text = book?.volumeInfo.title ?? "Unknown Title"
+        titleLabel.text = book?.volumeInfo?.title ?? "Unknown Title"
         titleLabel.numberOfLines = 0
         
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.font = .preferredFont(forTextStyle: .headline)
-        subtitleLabel.text = book?.volumeInfo.subtitle
+        subtitleLabel.text = book?.volumeInfo?.subtitle
         subtitleLabel.textColor = .systemGray
         subtitleLabel.numberOfLines = 0
         
         authorLabel.translatesAutoresizingMaskIntoConstraints = false
         authorLabel.font = .preferredFont(forTextStyle: .headline)
-        authorLabel.text = book?.volumeInfo.authors?.joined(separator: ", ") ?? "Unknown Author"
+        authorLabel.text = book?.volumeInfo?.authors?.joined(separator: ", ") ?? "Unknown Author"
         authorLabel.textColor = .lightGray
         authorLabel.numberOfLines = 0
         
         categoryLabel.translatesAutoresizingMaskIntoConstraints = false
-        categoryLabel.text = book?.volumeInfo.categories?.joined(separator: ", ") ?? "No Categories"
+        categoryLabel.text = book?.volumeInfo?.categories?.joined(separator: ", ") ?? "No Categories"
         categoryLabel.font = .preferredFont(forTextStyle: .headline)
         categoryLabel.textColor = .lightGray
         categoryLabel.numberOfLines = 0
         
         languageLabel.translatesAutoresizingMaskIntoConstraints = false
-        languageLabel.text = book?.volumeInfo.language ?? "Unknown Language"
+        languageLabel.text = book?.volumeInfo?.language ?? "Unknown Language"
         languageLabel.textColor = .lightGray
         languageLabel.font = .preferredFont(forTextStyle: .headline)
         languageLabel.numberOfLines = 0
@@ -298,7 +352,7 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
     func configureOverview() {
         overviewView.addSubview(descriptionLabel)
         
-        descriptionLabel.text = book?.volumeInfo.description ?? "No description available"
+        descriptionLabel.text = book?.volumeInfo?.description ?? "No description available"
         descriptionLabel.numberOfLines = 0
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -320,35 +374,44 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
         
         let nilValue = "Not available"
         
-        if let pageCount = book.volumeInfo.pageCount {
+        //page count
+        if let pageCount = book.volumeInfo?.pageCount {
             pageCountLabel.attributedText = NSAttributedString().detailAttributedText("Number of pages", "\(pageCount)")
         } else {
             pageCountLabel.attributedText = NSAttributedString().detailAttributedText("Number of pages", "\(nilValue)")
         }
-        
-        if let publishedDate = book.volumeInfo.publishedDate {
+        //published date
+        if let publishedDate = book.volumeInfo?.publishedDate {
             publishedDateLabel.attributedText = NSAttributedString().detailAttributedText("Published date", "\(publishedDate)")
         } else {
             publishedDateLabel.attributedText = NSAttributedString().detailAttributedText("Published date", "\(nilValue)")
         }
-        
-        if let publisher = book.volumeInfo.publisher {
+        //publisher
+        if let publisher = book.volumeInfo?.publisher {
             publisherLabel.attributedText = NSAttributedString().detailAttributedText("Publisher", "\(publisher)")
         } else {
             publisherLabel.attributedText = NSAttributedString().detailAttributedText("Publisher", "\(nilValue)")
         }
-        
-        saleAbilityLabel.attributedText = NSAttributedString().detailAttributedText("Sale ability", "\(book.saleInfo.saleability)")
-        
-        saleCountryLabel.attributedText = NSAttributedString().detailAttributedText("Country", "\(book.saleInfo.country)")
-        
-        if let listPrice = book.saleInfo.listPrice {
+        //sale ability
+        if let saleAbility = book.saleInfo?.saleability{
+            saleAbilityLabel.attributedText = NSAttributedString().detailAttributedText("Sale ability", "\(saleAbility)")
+        } else{
+            saleAbilityLabel.attributedText = NSAttributedString().detailAttributedText("Sale ability", "\(nilValue)")
+        }
+        //sale country
+        if let saleCountry = book.saleInfo?.country{
+            saleCountryLabel.attributedText = NSAttributedString().detailAttributedText("Country", "\(saleCountry)")
+        } else{
+            saleCountryLabel.attributedText = NSAttributedString().detailAttributedText("Country", "\(nilValue)")
+        }
+        //list price
+        if let listPrice = book.saleInfo?.listPrice {
             listPriceLabel.attributedText = NSAttributedString().detailAttributedText("List Price", "\(listPrice.currencyCode) \(listPrice.amount)")
         } else {
             listPriceLabel.attributedText = NSAttributedString().detailAttributedText("List Price", "\(nilValue)")
         }
-        
-        if let retailPrice = book.saleInfo.retailPrice {
+        //retail price
+        if let retailPrice = book.saleInfo?.retailPrice {
             retailPriceLabel.attributedText = NSAttributedString().detailAttributedText("Retail Price", "\(retailPrice.currencyCode) \(retailPrice.amount)")
         } else {
             retailPriceLabel.attributedText = NSAttributedString().detailAttributedText("Retail Price", "\(nilValue)")
@@ -379,15 +442,15 @@ class BookDetailViewController: UIViewController, UICollectionViewDelegateFlowLa
         webReaderLinkLabel.setTitle("Web reader link", for: .normal)
         
         previewLinkLabel.addAction(UIAction { [weak self] _ in
-            self?.openURL(self?.book.volumeInfo.previewLink)
+            self?.openURL(self?.book.volumeInfo?.previewLink)
         }, for: .touchUpInside)
         
         infoLinkLabel.addAction(UIAction { [weak self] _ in
-            self?.openURL(self?.book.volumeInfo.infoLink)
+            self?.openURL(self?.book.volumeInfo?.infoLink)
         }, for: .touchUpInside)
         
         webReaderLinkLabel.addAction(UIAction { [weak self] _ in
-            self?.openURL(self?.book.accessInfo.webReaderLink)
+            self?.openURL(self?.book.accessInfo?.webReaderLink)
         }, for: .touchUpInside)
         
         let verticalAnchor: CGFloat = 22

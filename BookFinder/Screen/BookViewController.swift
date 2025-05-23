@@ -26,10 +26,10 @@ class BookViewController: UIViewController {
         
         RandomWordManager.shared.getRandomWord { name, error in
             NetworkManager.shared.getBooks(name) { resultItem, error in
-                guard let resultItem = resultItem else { return }
-                self.books = resultItem.items
+                guard let books = resultItem?.items else { return }
+                self.books = books
                 DispatchQueue.main.async {
-                    self.updateBooks(resultItem.items)
+                    self.updateBooks(books)
                     self.spinner.stopAnimating()
                 }
             }

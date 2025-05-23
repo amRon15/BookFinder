@@ -21,7 +21,7 @@ class BookCollectionViewCell: UICollectionViewCell {
     }
     
     func set(_ book: Book){
-        imageView.load(book.volumeInfo.imageLinks?.thumbnail)
+        imageView.load(book.volumeInfo?.imageLinks?.thumbnail)
     }
     
     func configureImageView(){

@@ -10,7 +10,8 @@ import GoogleSignIn
 
 class NetworkManager{
     static let shared = NetworkManager()
-    let baseURL = "https://www.googleapis.com/books/v1/"
+    private let baseURL = "https://www.googleapis.com/books/v1/"
+    private let apiKey = "AIzaSyCttHR7V9WiLUU7SyxSV3iDtHZTmD-ExHo"
             
     var userAuthToken: String?
         
@@ -175,15 +176,15 @@ class NetworkManager{
         task.resume()
     }
     
-    func addBookToShelf(_ volumeID: String, completion: @escaping (Bool, String?) -> ()){
+    func addBookToShelf(_ volumeID: String, completion: @escaping (Bool, String?) -> ()) {
         guard let authToken = userAuthToken else {
-            completion(false, "User not sign in")
+            completion(false, "User not signed in")
             return
         }
         
-        let endpoint = baseURL + "myLibrary/bookshelves/\(0)/addVolume?volumeId=\(volumeID)"
+        let endpoint = baseURL + "mylibrary/bookshelves/0/addVolume?volumeId=\(volumeID)"
         guard let url = URL(string: endpoint) else {
-            completion(false, "Invalid Url")
+            completion(false, "Invalid URL")
             return
         }
         
@@ -192,13 +193,26 @@ class NetworkManager{
         request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error{
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
                 completion(false, error.localizedDescription)
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else{
-                completion(false, "Failed to add book to bookshelves")
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response: No HTTP response")
+                completion(false, "Invalid response from the server")
+                return
+            }
+            
+            print("HTTP Status Code: \(httpResponse.statusCode)")
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("Response Data: \(responseString)")
+            }
+            
+            // Accept both 204 and 200 as success
+            guard (200...204).contains(httpResponse.statusCode) else {
+                completion(false, "Failed to add book to bookshelf. Status code: \(httpResponse.statusCode)")
                 return
             }
             
@@ -208,28 +222,82 @@ class NetworkManager{
         task.resume()
     }
     
-    func getBookshelf(shelfId: String = "0", completion: @escaping (ResultItem?, Error?) -> Void) {
+    func deleteBookmark(_ volumeID: String, completion: @escaping (Bool, String?) -> ()){
+        guard let authToken = userAuthToken else {
+            completion(false, "User not signed in")
+            return
+        }
+        
+        let endpoint = baseURL + "mylibrary/bookshelves/0/removeVolume?volumeId=\(volumeID)"
+        guard let url = URL(string: endpoint) else {
+            completion(false, "Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                completion(false, error.localizedDescription)
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response: No HTTP response")
+                completion(false, "Invalid response from the server")
+                return
+            }
+            
+            print("HTTP Status Code: \(httpResponse.statusCode)")
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("Response Data: \(responseString)")
+            }
+            
+            // Accept both 204 and 200 as success
+            guard (200...204).contains(httpResponse.statusCode) else {
+                completion(false, "Failed to add book to bookshelf. Status code: \(httpResponse.statusCode)")
+                return
+            }
+            
+            completion(true, nil)
+        }
+        
+        task.resume()
+    }
+    
+    func getBookshelf(completion: @escaping (ResultItem?, Error?) -> Void) {
         guard let authToken = userAuthToken else {
             let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not signed in"])
             completion(nil, error)
             return
         }
-        
-        let urlString = "https://www.googleapis.com/books/v1/mylibrary/bookshelves/\(shelfId)/volumes"
-        guard let url = URL(string: urlString) else {
+
+        let endpoint = baseURL + "mylibrary/bookshelves/0/volumes"
+        guard let url = URL(string: endpoint) else {
             let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
             completion(nil, error)
             return
         }
         
         var request = URLRequest(url: url)
+        request.httpMethod = "GET"
         request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("Network error: \(error.localizedDescription)")
                 completion(nil, error)
                 return
             }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response: No HTTP response")
+                completion(nil, NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response from the server"]))
+                return
+            }            
             
             guard let data = data else {
                 let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])
@@ -243,13 +311,72 @@ class NetworkManager{
                 let resultItem = try decoder.decode(ResultItem.self, from: data)
                 completion(resultItem, nil)
             } catch {
+                print("Unexpected error: \(error.localizedDescription)")
                 completion(nil, error)
             }
         }
         task.resume()
     }
     
-    func signInWithGoogle(_ viewController: UIViewController, completion: @escaping (Bool, String?) -> ()){
+    func isBookSaved(_ volumeId: String, completion: @escaping (Bool, String?) -> ()){
+        guard let authToken = userAuthToken else {
+            completion(false, "User not signed in")
+            return
+        }
+
+        let endpoint = baseURL + "mylibrary/bookshelves/0/volumes?q=id:\(volumeId)"
+        guard let url = URL(string: endpoint) else {
+            completion(false, "Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                completion(false, error.localizedDescription)
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response: No HTTP response")
+                completion(false, "Invalid response from the server")
+                return
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                completion(false, "Server returned status code: \(httpResponse.statusCode)")
+                return
+            }
+            
+            guard let data = data else {
+                completion(false, "No data received")
+                return
+            }
+            
+            // Print response data for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Response data: \(responseString)")
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let resultItem = try decoder.decode(ResultItem.self, from: data)
+                // If the book is found in the bookshelf, items array will contain it
+                completion(resultItem.totalItems != 0, nil)
+            } catch {
+                print("Decoding error: \(error.localizedDescription)")
+                completion(false, "Failed to decode response")
+            }
+        }
+        task.resume()
+    }
+    
+    func signInWithGoogle(_ viewController: UIViewController, completion: @escaping (Bool, String?) -> ()) {
         guard (GIDSignIn.sharedInstance.configuration?.clientID) != nil else {
             print("Error: Google Sign In client ID is not configured")
             completion(false, "Google Sign In is not properly configured")
@@ -257,7 +384,8 @@ class NetworkManager{
         }
         
         print("Attempting to sign in with Google...")
-        GIDSignIn.sharedInstance.signIn(withPresenting: viewController, hint: nil) { [weak self] result, error in
+        let scopes = ["https://www.googleapis.com/auth/books"]
+        GIDSignIn.sharedInstance.signIn(withPresenting: viewController, hint: nil, additionalScopes: scopes) { [weak self] result, error in
             if let error = error {
                 print("Google Sign In error: \(error.localizedDescription)")
                 completion(false, error.localizedDescription)
@@ -270,16 +398,25 @@ class NetworkManager{
                 return
             }
             
-            print("Google Sign In successful")
-            self?.currentUser = result.user
-            self?.userAuthToken = result.user.accessToken.tokenString
+            let user = result.user
+            let authToken = user.accessToken.tokenString
             
+            print("Google Sign In successful")
+            self?.currentUser = user
+            self?.userAuthToken = authToken
             completion(true, nil)
         }
     }
     
     func signOut(){
         GIDSignIn.sharedInstance.signOut()
+        GIDSignIn.sharedInstance.disconnect { error in
+            if let error = error {
+                print("Error disconnecting Google Sign-In: \(error.localizedDescription)")
+            } else {
+                print("Successfully disconnected Google Sign-In")
+            }
+        }
         userAuthToken = nil
         currentUser = nil
     }
