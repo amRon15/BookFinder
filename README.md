@@ -18,25 +18,25 @@ BookFinder is an iOS application designed to help users discover and explore boo
 
 ## Screen Capture
 ### Login
-![login](https://github.com/user-attachments/assets/4c326357-bd9f-402b-8a15-d1883169eaa1)
+![login](https://github.com/user-attachments/assets/62314042-5e1e-434e-8f38-c227676c8210)
 
 ### Home
-![Home](https://github.com/user-attachments/assets/a8962d46-703f-452a-a4c7-d6a846064d78)
+![Home](https://github.com/user-attachments/assets/338dbc6f-1cfe-49de-979f-2552a8f42b42)
 
 ### Search
-![Search](https://github.com/user-attachments/assets/e5d4fe83-a49e-4d6c-b351-8a80062f93f1)
-![Search_loading](https://github.com/user-attachments/assets/fafa050e-f32f-4e0f-8b3f-6bcb1f83913d)
+![Search](https://github.com/user-attachments/assets/4d79bfd6-f2ff-4322-a7ca-109956cb446b)
+![Search_loading](https://github.com/user-attachments/assets/3170c47e-b5d1-4ab5-a894-28c46413704e)
 
 ### Book detail
-![Detail_Overview](https://github.com/user-attachments/assets/0326365d-e105-47e9-9fc2-347c4ad1d881)
-![Detail_Detail](https://github.com/user-attachments/assets/fdcd7325-124b-4dee-b167-6f5c0612d671)
-![Detail_links](https://github.com/user-attachments/assets/eefbc75f-7700-458f-8b98-9fea00ef5347)
+![Detail_Overview](https://github.com/user-attachments/assets/8fc7cca0-4004-49ce-a89a-204d45b65d94)
+![Detail_Detail](https://github.com/user-attachments/assets/081c1a78-327b-41af-ad11-43030a7b3ebc)
+![Detail_links](https://github.com/user-attachments/assets/1488f830-134b-417c-b84e-38df49908db8)
 
 ### Bookmark
-![Bookmark](https://github.com/user-attachments/assets/80bfeb97-f746-464c-9e65-96970cb6d1d5)
+![Bookmark](https://github.com/user-attachments/assets/33089c85-f189-4be0-a8dd-37396c1774e6)
 
 ### Profile
-![Profile](https://github.com/user-attachments/assets/75010b16-e8c4-4bf7-bb78-5607435ff92e)
+![Profile](https://github.com/user-attachments/assets/662f5cfd-1538-4dda-b248-4c731ae23a45)
 
 ## Technology
 
