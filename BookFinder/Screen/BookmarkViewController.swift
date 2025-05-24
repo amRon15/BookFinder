@@ -48,6 +48,7 @@ class BookmarkViewController: UIViewController {
                     guard let books = resultItem.items else { return }
                     self.updateBooks(books)
                     self.messageLabelView.isHidden = true
+                    self.navigationController?.title = "\(resultItem.totalItems)"
                 }
             }
             

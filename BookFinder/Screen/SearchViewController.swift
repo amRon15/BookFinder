@@ -57,6 +57,7 @@ class SearchViewController: UIViewController {
         }
         bookListViewController.bookName = searchBookField.text
         bookListViewController.title = searchBookField.text
+        bookListViewController.currentIndex = 0
         navigationController?.pushViewController(bookListViewController, animated: true)
     }
     

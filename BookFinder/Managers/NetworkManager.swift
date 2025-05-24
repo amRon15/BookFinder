@@ -104,8 +104,8 @@ class NetworkManager{
         task.resume()
     }
     
-    func getBooksByName(_ name: String, completion: @escaping (ResultItem?, String?) -> ()){
-        let endpoint = baseURL + "volumes?q=\(name)&orderBy=newest"
+    func getBooksByName(_ name: String, _ index: Int, completion: @escaping (ResultItem?, String?) -> ()){
+        let endpoint = baseURL + "volumes?q=\(name)&maxResults=10&startIndex=\(index)&orderBy=newest"
         
         guard let url = URL(string: endpoint) else {
             completion(nil, "Invalid request")
@@ -140,8 +140,8 @@ class NetworkManager{
         task.resume()
     }
     
-    func getBooksByCategory(_ category: String, completion: @escaping (ResultItem?, String?) -> ()){
-        let endpoint = baseURL + "volumes?q=subject:\(category)&orderBy=newest"
+    func getBooksByCategory(_ category: String, _ index: Int, completion: @escaping (ResultItem?, String?) -> ()){
+        let endpoint = baseURL + "volumes?q=subject:\(category)&maxResults=10&startIndex=\(index)&orderBy=newest"
         
         guard let url = URL(string: endpoint) else {
             completion(nil, "Invalid request")
@@ -324,7 +324,7 @@ class NetworkManager{
             return
         }
 
-        let endpoint = baseURL + "mylibrary/bookshelves/0/volumes?\(volumeId)"
+        let endpoint = baseURL + "mylibrary/bookshelves/0/volumes"
         guard let url = URL(string: endpoint) else {
             completion(false, "Invalid URL")
             return
@@ -357,18 +357,17 @@ class NetworkManager{
                 return
             }
             
-            // Print response data for debugging
-            print(volumeId)
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Response data: \(responseString)")
-            }
-            
             do {
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let resultItem = try decoder.decode(ResultItem.self, from: data)
-                // If the book is found in the bookshelf, items array will contain it
-                completion(resultItem.totalItems != 0, nil)
+                
+                // Check if the book exists in the bookshelf by looking at the items array
+                let isSaved = resultItem.items?.contains { item in
+                    item.id == volumeId
+                } ?? false
+                
+                completion(isSaved, nil)
             } catch {
                 print("Decoding error: \(error.localizedDescription)")
                 completion(false, "Failed to decode response")

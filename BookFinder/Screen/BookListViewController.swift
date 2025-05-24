@@ -10,8 +10,11 @@ import UIKit
 class BookListViewController: UIViewController {
     var bookName: String!
     var resultItem: ResultItem?
-    var books: [Book]?
-    var searchMethod: SearchMethod!        
+    var books: [Book] = []
+    var searchMethod: SearchMethod!
+    
+    var currentIndex = 0
+    private var loadTime = 0
     
     var tableView = UITableView()
     var spinner = UIActivityIndicatorView()
@@ -28,16 +31,34 @@ class BookListViewController: UIViewController {
     }
     
     func getBooks(){
+        spinner.startAnimating()
+        
+        if currentIndex != 0 && loadTime == 1{
+            let footerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: spinner.frame.height))
+            spinner.translatesAutoresizingMaskIntoConstraints = false
+            footerView.addSubview(spinner)
+            
+            NSLayoutConstraint.activate([
+                spinner.centerXAnchor.constraint(equalTo: footerView.centerXAnchor),
+                spinner.centerYAnchor.constraint(equalTo: footerView.centerYAnchor)
+            ])
+            
+            tableView.tableFooterView = footerView
+        }
+        
         switch searchMethod {
         case .ByName:
-            NetworkManager.shared.getBooksByName(bookName) { resultItem, errorMessage in
+            NetworkManager.shared.getBooksByName(bookName, currentIndex) { resultItem, errorMessage in
                 guard let resultItem = resultItem else {
                     self.presentErrorAlertOnMainThread(title: "Failed", message: errorMessage!, buttonTitle: "Ok")
                     return
                 }
                 
-                self.resultItem = resultItem
-                self.books = self.resultItem?.items
+                if let books = resultItem.items{
+                    self.books += books
+                    self.currentIndex += 10
+                    self.loadTime = self.loadTime == 0 ? self.loadTime + 1 : self.loadTime
+                }
                 
                 DispatchQueue.main.async {
                     self.spinner.stopAnimating()
@@ -45,14 +66,17 @@ class BookListViewController: UIViewController {
                 }
             }
         case .ByCategory:
-            NetworkManager.shared.getBooksByCategory(bookName) { resultItem, errorMessage in
+            NetworkManager.shared.getBooksByCategory(bookName, currentIndex) { resultItem, errorMessage in
                 guard let resultItem = resultItem else {
                     self.presentErrorAlertOnMainThread(title: "Failed", message: errorMessage!, buttonTitle: "Ok")
                     return
                 }
                 
-                self.resultItem = resultItem
-                self.books = self.resultItem?.items
+                if let books = resultItem.items{
+                    self.books += books
+                    self.currentIndex += 10
+                    self.loadTime = self.loadTime == 0 ? self.loadTime + 1 : self.loadTime
+                }
                 
                 DispatchQueue.main.async {
                     self.spinner.stopAnimating()
@@ -96,7 +120,7 @@ class BookListViewController: UIViewController {
         spinner.color = .systemGreen
         spinner.style = .large
         spinner.translatesAutoresizingMaskIntoConstraints = false
-        spinner.startAnimating()
+                
         
         NSLayoutConstraint.activate([
             spinner.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
@@ -108,22 +132,28 @@ class BookListViewController: UIViewController {
 
 extension BookListViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return books?.count ?? 0
+        return books.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: BookTableViewCell.reuseID) as! BookTableViewCell
-        guard let book = books?[indexPath.row] else { return UITableViewCell()}
+        let book = books[indexPath.row]
         cell.set(book)
                 
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedBook = books![indexPath.row]
+        let selectedBook = books[indexPath.row]
         let bookDetailViewController = BookDetailViewController()
         bookDetailViewController.book = selectedBook
         navigationController?.pushViewController(bookDetailViewController, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row + 1 == books.count{
+            getBooks()
+        }
     }
 }

@@ -34,9 +34,13 @@ class BookTableViewCell: UITableViewCell {
         self.bookImageView.load(book.volumeInfo?.imageLinks?.thumbnail)
         self.bookTitleLabel.text = book.volumeInfo?.title
         self.bookAuthorsLabel.text = book.volumeInfo?.authors?.joined(separator: ", ")
-        self.bookLanguageLabel.text = "Language: \(book.volumeInfo?.language)"
+        
+        if let language = book.volumeInfo?.language{
+            self.bookLanguageLabel.attributedText = NSAttributedString().detailAttributedText("Language", language)
+        }
+        
         if let categories = book.volumeInfo?.categories{
-            self.bookCategoryLabel.text = "Category: \(categories.joined(separator: ", "))"
+            self.bookCategoryLabel.attributedText = NSAttributedString().detailAttributedText("Category", categories.joined(separator: ", "))            
         }
     }
     
