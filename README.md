@@ -51,12 +51,6 @@ BookFinder is an iOS application designed to help users discover and explore boo
 - Custom UI components
 - Protocol-oriented programming
 
-## Installation
-
-1. Clone the repository
-2. Open `BookFinder.xcodeproj` in Xcode
-3. Build and run the project
-
 ## License
 
 This project is licensed under the MIT License.
