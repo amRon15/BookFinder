@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>GIDClientID</key>
-	<string>667515877975-vr59p60e5q59u7i13ii68hunv4qkidv5.apps.googleusercontent.com</string>
+	<string>/*google oauth client id*/</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -13,7 +13,7 @@
 			<string>com.ron.BookFinder</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.667515877975-vr59p60e5q59u7i13ii68hunv4qkidv5</string>
+				<string>/*reverse google oauth client id*/</string>
 			</array>
 		</dict>
 	</array>
