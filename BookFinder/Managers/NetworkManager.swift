@@ -11,7 +11,6 @@ import GoogleSignIn
 class NetworkManager{
     static let shared = NetworkManager()
     private let baseURL = "https://www.googleapis.com/books/v1/"
-    private let apiKey = "AIzaSyCttHR7V9WiLUU7SyxSV3iDtHZTmD-ExHo"
             
     var userAuthToken: String?
         
