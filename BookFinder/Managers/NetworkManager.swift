@@ -421,4 +421,20 @@ class NetworkManager{
         userAuthToken = nil
         currentUser = nil
     }
+    
+    func getUserInfo(completion: @escaping (User?, String?) -> ()){
+        guard let currentUser = currentUser else {
+            completion(nil, "No user is signed in")
+            return
+        }
+        
+        let profile = currentUser.profile
+        var user = User(name: profile?.name ?? "Unknown", email: profile?.email ?? "No email")
+        
+        if let profile = profile, profile.hasImage {
+            user.imageUrl = profile.imageURL(withDimension: 200)?.absoluteString
+        }
+        
+        completion(user, nil)
+    }
 }

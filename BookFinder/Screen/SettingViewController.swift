@@ -9,11 +9,43 @@ import UIKit
 
 class SettingViewController: UIViewController {
     let logoutButton = UIButton()
-
+    let userImageView = UIImageView()
+    let userNameLabel = UILabel()
+    let userEmailLabel = UILabel()
+    var user: User?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
         navigationController?.navigationBar.tintColor = .systemGreen
-        configureLogoutButton()
+        
+        configureUser()
+        getUserProfile()
+    }
+    
+    func getUserProfile(){
+        NetworkManager.shared.getUserInfo { [weak self] user, error in
+            if let error = error {
+                print(error)
+                DispatchQueue.main.async {
+                    self?.presentErrorAlertOnMainThread(title: "Error", message: error, buttonTitle: "OK")
+                }
+                return
+            }
+            
+            if let user = user {
+                DispatchQueue.main.async {
+                    self?.user = user
+                    self?.updateUserInfo()
+                }
+            }
+        }
+    }
+    
+    func updateUserInfo() {
+        userImageView.load(user?.imageUrl)
+        userNameLabel.text = user?.name
+        userEmailLabel.text = user?.email
     }
     
     func configureLogoutButton(){
@@ -43,8 +75,49 @@ class SettingViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             logoutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            logoutButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            logoutButton.topAnchor.constraint(equalTo: userEmailLabel.bottomAnchor, constant: 30)
         ])
+    }
+    
+    func configureUser(){
+        view.addSubview(userImageView)
+        view.addSubview(userNameLabel)
+        view.addSubview(userEmailLabel)
+        
+        userImageView.translatesAutoresizingMaskIntoConstraints = false
+        userNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        userEmailLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Configure user image view
+        userImageView.contentMode = .scaleAspectFit
+        userImageView.layer.cornerRadius = 50
+        userImageView.clipsToBounds = true
+        userImageView.backgroundColor = .systemGray6
+        
+        // Configure name label
+        userNameLabel.textColor = .systemGreen
+        userNameLabel.font = .preferredFont(forTextStyle: .title2)
+        userNameLabel.textAlignment = .center
+        
+        // Configure email label
+        userEmailLabel.textColor = .systemGray
+        userEmailLabel.font = .preferredFont(forTextStyle: .body)
+        userEmailLabel.textAlignment = .center
+        
+        NSLayoutConstraint.activate([
+            userImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            userImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
+            userImageView.widthAnchor.constraint(equalToConstant: 100),
+            userImageView.heightAnchor.constraint(equalToConstant: 100),
+            
+            userNameLabel.topAnchor.constraint(equalTo: userImageView.bottomAnchor, constant: 20),
+            userNameLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            userEmailLabel.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 8),
+            userEmailLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        configureLogoutButton()
     }
     
     @objc func logout(){
