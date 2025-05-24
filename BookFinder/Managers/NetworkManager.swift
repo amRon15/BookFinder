@@ -324,7 +324,7 @@ class NetworkManager{
             return
         }
 
-        let endpoint = baseURL + "mylibrary/bookshelves/0/volumes?q=id:\(volumeId)"
+        let endpoint = baseURL + "mylibrary/bookshelves/0/volumes?\(volumeId)"
         guard let url = URL(string: endpoint) else {
             completion(false, "Invalid URL")
             return
@@ -358,6 +358,7 @@ class NetworkManager{
             }
             
             // Print response data for debugging
+            print(volumeId)
             if let responseString = String(data: data, encoding: .utf8) {
                 print("Response data: \(responseString)")
             }

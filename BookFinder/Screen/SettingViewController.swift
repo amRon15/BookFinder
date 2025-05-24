@@ -20,7 +20,7 @@ class SettingViewController: UIViewController {
         logoutButton.translatesAutoresizingMaskIntoConstraints = false
         
         // Set button title and style
-        logoutButton.setTitle("Login with Google", for: .normal)
+        logoutButton.setTitle("Logout", for: .normal)
         logoutButton.titleLabel?.font = .preferredFont(forTextStyle: .title3)
         logoutButton.setTitleColor(.systemBlue, for: .normal)
         
